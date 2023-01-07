@@ -22,13 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # ------------------SECRET KEY HIDDEN----------------------------------------
 import os
-import dotenv
+# import dotenv
 
-dotenv_file = os.path.join(BASE_DIR, ".env")
-if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
+# dotenv_file = os.path.join(BASE_DIR, ".env")
+# if os.path.isfile(dotenv_file):
+#     dotenv.load_dotenv(dotenv_file)
 
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = "ABC123098$%^&"
 # ------------------------------------------------------------------------
 
 # SECURITY WARNING: don't run with debug turned on in production!

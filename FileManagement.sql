@@ -63,21 +63,6 @@ CREATE TABLE Teacher (
 );
 
 
-CREATE TABLE Student (
-    usn VARCHAR(10) PRIMARY KEY,
-    Fname VARCHAR(255) NOT NULL,
-    Lname VARCHAR(255) NOT NULL,
-    Class VARCHAR(10) NOT NULL,
-    DOB DATE NOT NULL,
-    Email VARCHAR(255) NOT NULL,
-    Phno NUMERIC(13) NOT NULL,
-    Image VARCHAR(255),
-    Portfolio_links VARCHAR(500),
-    About VARCHAR(700),
-    FOREIGN KEY (Class) REFERENCES Class(Class),
-    FOREIGN KEY (usn) REFERENCES Registration (usn_ssid) ON DELETE CASCADE
-);
-
 CREATE TABLE Class(
 	Class VARCHAR(10) PRIMARY KEY,
     Branch VARCHAR(20) REFERENCES Branch(Branch_id),
@@ -109,6 +94,21 @@ INSERT INTO Class VALUES ('CSE7C','CSE',7,'C');
 INSERT INTO Class VALUES ('CSE8A','CSE',8,'A');
 INSERT INTO Class VALUES ('CSE8B','CSE',8,'B');
 INSERT INTO Class VALUES ('CSE8C','CSE',8,'C');
+
+CREATE TABLE Student (
+    usn VARCHAR(10) PRIMARY KEY,
+    Fname VARCHAR(255) NOT NULL,
+    Lname VARCHAR(255) NOT NULL,
+    Class VARCHAR(10) NOT NULL,
+    DOB DATE NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+    Phno NUMERIC(13) NOT NULL,
+    Image VARCHAR(255),
+    Portfolio_links VARCHAR(500),
+    About VARCHAR(700),
+    FOREIGN KEY (Class) REFERENCES Class(Class),
+    FOREIGN KEY (usn) REFERENCES Registration (usn_ssid) ON DELETE CASCADE
+);
 
 DELIMITER //
 CREATE PROCEDURE greetings(IN USN CHAR(10))
