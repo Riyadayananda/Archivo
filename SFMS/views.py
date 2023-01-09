@@ -261,32 +261,7 @@ def StudentDashboard(request):
     data = {items[0]: items[1] for items in cur}
     
 
-    try:
-        cur1 = connections['default'].cursor()
-    except DatabaseError as e:
-        print(e)
-        messages.warning(request, "Cannot connect to Database \n Please try again later")
-        return redirect('Login')
-    try:
-        sql = """SELECT DISTINCT M.* FROM Message_recieved M
-                    WHERE M.Class = (SELECT S.Class FROM Student S WHERE S.usn = %s)
-                    ORDER BY M.Sent_time DESC LIMIT 1;"""
-        cur1.execute(sql, (request.session.get('user'),))
-    except IntegrityError or OperationalError as e:
-        print(e)
-        messages.warning(request, "Internal error in fetching messages")
-    message = cur1.fetchone()
-    if message is None:
-        return render(request, "StudentDashboard.html",{'username':greeting(request), 'url':'/StudentDashboard', 'Purl':'/StudentDashboard/StudentProfile'}|{'subject':data})
-
-    dict = {}
-    dict['name'] = message[1] + ' ' + message[2]
-    dict['subject'] = message[3].capitalize()
-    dict['sent_time'] = message[4]
-    dict['title'] = message[5]
-    dict['content'] = message[6]
-    
-    return render(request, "StudentDashboard.html",{'username':greeting(request), 'url':'/StudentDashboard', 'Purl':'/StudentDashboard/StudentProfile'}|{'subject':data,'message':dict})
+    return render(request, "StudentDashboard.html",{'username':greeting(request), 'url':'/StudentDashboard', 'Purl':'/StudentDashboard/StudentProfile'}|{'subject':data})
 
 
 def TeacherDashboard(request): 
@@ -305,23 +280,6 @@ def TeacherDashboard(request):
     for item in cur:
         name = item[0] + '-'+ str(item[1]) + item[2]
         data[name]=item[4]
-    
-
-    if(request.method == 'POST'):
-        try:
-            Class = "".join(request.POST.get("class").split('-'))
-            params = (request.session.get('user'), Class, request.POST.get("title"), request.POST.get("content"))
-
-            cur=connections['default'].cursor()
-            sql = "INSERT INTO Notification(ssid,Class,Title,Message) VALUES (%s, %s, %s, %s);"
-            cur.execute(sql, params)
-            messages.success(request,"Message Sent")
-           
-            
-        except (ObjectDoesNotExist,AttributeError,TypeError) as e:
-            print(e)
-            messages.warning(request, "Form not filled, \n Please check again")
-            return redirect('TeacherDashboard')    
         
     return render(request, "TeacherDashboard.html",{'username':greeting(request), 'url':'/TeacherDashboard', 'Purl':'/TeacherDashboard/TeacherProfile'}|{'subject':data})
 
@@ -582,30 +540,6 @@ def TeacherFilePage(request, ClassName):
     ClassName = ClassName[:3]+'-'+ClassName[3:]
     return redirect('TeacherFilePage', ClassName)
 
-def notifications(request):
-    cur = connections['default'].cursor()
-    try:
-        sql = """SELECT DISTINCT M.* FROM Message_recieved M
-                    WHERE M.Class = (SELECT S.Class FROM Student S WHERE S.usn = %s)
-                    ORDER BY M.Sent_time DESC;"""
-        cur.execute(sql, (request.session.get('user'),))
-    except (IntegrityError, OperationalError) as e:
-        print(e)
-        messages.warning(request, "Unable to update notification, please try again later.")
-    #data = cur.fetchall()
-    data=[]
-    for tuple in cur.fetchall():
-        dict = {}
-        dict['TeacherImage'] = tuple[0]
-        dict['name'] = tuple[1] + ' ' + tuple[2]
-        dict['subject'] = tuple[3].capitalize()
-        dict['sent_time'] = tuple[4]
-        dict['title'] = tuple[5]
-        dict['content'] = tuple[6]
-        data.append(dict)
-
-    return render(request, "notifications.html",{'username':greeting(request)}|{'message':data,'url':'/StudentDashboard','Purl':'/StudentDashboard/StudentProfile'})
-
 
 def downloadFile(request):
     if request.method == 'POST':
@@ -697,44 +631,6 @@ def UserAdminLogin(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
-def UserAdmin(request):
-    if request.method != "POST":
-        cur  = connections['default'].cursor()
-        sql = """SELECT Subject_Handle.*, Subject.Subject_name, Teacher.Fname, Teacher.Lname FROM Subject_Handle LEFT 
-                    JOIN Teacher ON Subject_Handle.ssid = Teacher.ssid 
-                    JOIN Subject ON Subject.Subject_code = Subject_Handle.Subject_code
-                    ORDER BY Subject_Handle.Class;"""
-        cur.execute(sql)
-
-        data = {str(i+1):{'ssid':item[0],'class':item[1], 'code':item[2], 'name':item[3], 'Fname':item[4], 'Lname':item[5]} for i,item in enumerate(cur.fetchall())}
-        return render(request, "admin.html", {'data':data})
-
-    if 'delete' in request.POST:
-        ssid = request.POST.get('delete')
-        ssid, subcode, classs = ssid.split('+')
-        cur = connections['default'].cursor()
-        sql = "DELETE FROM Subject_handle where ssid = %s AND Subject_code = %s AND Class = %s"
-        messages.warning(request, "User deleted Successfully")
-        try:
-            cur.execute(sql, (ssid, subcode, classs))
-        except (IntegrityError, OperationalError) as e:
-            print(e)
-
-    else:
-        ssid = request.POST.get('ssid')
-        Class = request.POST.get('Class')
-        Subcode = request.POST.get('Subcode')
-    
-        cur = connections['default'].cursor()
-        sql = "INSERT INTO SUBJECT_Handle VALUES (%s, %s, %s);"
-        try:
-                cur.execute(sql, (ssid, Class, Subcode))
-        except (IntegrityError, OperationalError) as e:
-            print(e)
-            messages.error(request, "Please check the data again")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-        
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 def archive(request):
     if request.method == "POST":

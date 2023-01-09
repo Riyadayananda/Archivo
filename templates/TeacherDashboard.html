@@ -42,34 +42,7 @@
 <hr>
 <br>
 
-<section id = "announcement">
-	<div class = "center">
-		<h1>Make an Announcement</h1>
-		
-		<form action="#" method="post" class="form">{%csrf_token%}
-			<select class="inputbox" id="class" name="class" placeholder="Class">			 
-			  <option value="" disabled selected > Please Select The Class</option> 
-			  {% for key,value in subject.items %}
-			  <option value="{{key}}">{{key}}</option>
-			  {% endfor %}
-			</select>
-			
-			<div class="inputbox ">
-				<input type="text" required="required" name="title" pattern="[A-Za-z0-9:/ ,]*">
-				<span>Title</span>
-			</div>
-			<div class="inputbox">
-				<textarea name="content" required="required" id="content" cols="50" rows="5" placeholder="Content"></textarea>
-			
-			</div>
-			<br><br><br>
-			<div class="inputbox">
-				<button type="submit" class="btn">Send</button>
-			</div>
-		</form>
-	</div>
-	<br>
-</section> 
+
 {% if messages %}
     {% for message in messages %}
         <div id="msg" style="display: none;">{{message}}</div>
