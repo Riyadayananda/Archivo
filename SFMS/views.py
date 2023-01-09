@@ -24,30 +24,28 @@ import logging
 
 #logging.disable(logging.CRITICAL)
 #logging.basicConfig(filename = "logfile.log", level = logging.CRITICAL, format = '%(asctime)s - %(levelname)s : %(message)s', filemode = 'w')
-logging.basicConfig(filename = "logfile.log", level = logging.DEBUG, format = '%(asctime)s - %(levelname)s : %(message)s', filemode = 'w')
+
 
 # Create your views here.
 def index(request):
     # request.session.flush()
-    logging.info('Home Page')
-    return render(request,"index.html")
+ return render(request,"index.html")
 
 def Login(request):
-    logging.info('User Login')
     return render (request, "Login.html")
 
 def StudentReg(request):
-    logging.info('Student Registration')
+    
     try:
         cur = connections['default'].cursor()
         try:
             sql = "SELECT * FROM College"
             cur.execute(sql)
-            logging.debug('College table'+ str(cur.fetchall()))
+           
         except (IntegrityError,OperationalError) as e:
             print(e)
             messages.warning(request, 'Cannot fetch colleges')
-            logging.error('Cannot fetch values from College table')
+           
         college ={}
         for item in cur:
             college[item[0]]=item[1]
@@ -55,11 +53,11 @@ def StudentReg(request):
         try:
             sql = "SELECT * FROM Branch"
             cur.execute(sql)
-            logging.debug('Branch table'+ str(cur.fetchall()))
+           
         except (IntegrityError,OperationalError) as e:
             print(e)
             messages.warning(request, "Cannot fetch branches")
-            logging.error('Cannot fetch values from Branch table')
+           
   
         branch ={}
         for item in cur:
@@ -67,41 +65,38 @@ def StudentReg(request):
                 branch[item[2]]={item[0] : item[1]}
                 continue
             branch[item[2]][item[0]] = item[1]
-        logging.debug('Parameters passed')
-        logging.debug('College : '+ str(college))
-        logging.debug('Branch : ' + str(branch))
+       
 
         return render(request, 'StudentReg.html', {'params':college}|{'branch':branch})
     except DatabaseError or DataError as e:
         print(e.args)
         messages.warning(request, "Cannot connect to Database \n Please Try again later")
-        logging.error('Cannot connect to the database')
         raise Http404
 
 
 def TeacherReg(request):
-    logging.info('Teacher Registration')
+    
     try:
         cur = connections['default'].cursor()
         try:
             sql = "SELECT * FROM College"
             cur.execute(sql)
-            logging.debug('College table'+ str(cur.fetchall()))
+           
         except (IntegrityError,OperationalError) as e:
             print(e)
             messages.warning(request, "Cannot fetch colleges")
-            logging.error('Cannot fetch values from College table')
+           
         params ={}
         for item in cur:
             params[item[0]]=item[1]
         try:
             sql = "SELECT * FROM Branch"
             cur.execute(sql)
-            logging.debug('Branch table'+ str(cur.fetchall()))
+            
         except (IntegrityError,OperationalError) as e:
             print(e)
             messages.warning(request, "Cannot fetch branches")
-            logging.error('Cannot fetch values from Branch table')
+            
 
 #        branch = {}
 #        colli = []
@@ -115,19 +110,17 @@ def TeacherReg(request):
                 branch[item[2]]={item[0] : item[1]}
                 continue
             branch[item[2]][item[0]] = item[1]
-        logging.debug('Parameters passed')
-        logging.debug('College : '+ str(params))
-        logging.debug('Branch : ' + str(branch))
+        
 
         return render(request, 'TeacherReg.html', {'params':params}|{'branch':branch})
     except DatabaseError or DataError as e:
         print(e.args)
         messages.warning(request, "Cannot connect to Database \n Please try again later")
-        logging.error('Cannot connect to the database')
+       
         raise Http404
 
 def error_404(request,exception):
-    logging.info('Error 404')
+    
     return render(request, "404.html")
 
 def doLogin(request):
@@ -153,11 +146,11 @@ def doLogin(request):
 
     if(p):
         # messages.success(request, "Login successful")
-        logging.info("Login successful")
+        
         data = cur.fetchall()
         # global USN
         request.session['user']=data[0][0]
-        logging.info("USER is: "+request.session.get('user'))
+        
 
         if(data[0][6]=='S'):
             print(request.session.get('user'))
@@ -187,7 +180,7 @@ def doReg(request):
     except ObjectDoesNotExist as e:
         print(e)
         messages.warning(request, "Form not filled, \n Please check again")
-        logging.info('Form not filled')
+        
         raise Http404
 
     if(passw==re_pass):
@@ -204,14 +197,14 @@ def doReg(request):
             print(e)
             refer = {'PRIMARY':"USN/SSID already in use,\n Please Login", 'Username':"Username taken,\nPlease chose a new Username", 'Email':"Email taken, \nUse other Email","":"Minimum 3 characters required for domain of mailId", 'email_check':"Minimum 3 characters required for domain of mailId", '(1048, "Column \'College\' cannot be nul':"Please select the college"}
             messages.warning(request, refer.get(str(e.args).split('.')[-1][:-3], "Please fill the details correctly"))
-            logging.warning(str(e.args))
+            
             return redirect(request.META['HTTP_REFERER'][22:])
 
         # messages.success(request, "Registration Succesful")
         # global USN
         # USN = usn
         # print(USN)
-        logging.info("Successful Registration")
+        
         if T_or_S == 'S':
             return redirect('StudentProfile')
         else:
@@ -226,7 +219,7 @@ def greeting(request):
     try:
         cur = connections['default'].cursor() 
         print(request.session.get('user'))
-        logging.info('User : ' + str(request.session.get('user')))
+        
         try:
             cur.execute("CALL greetings(%s)", (request.session.get('user'),))
         except (IntegrityError, OperationalError) as e:
@@ -249,7 +242,7 @@ def trial(request): #trial purpose
     return render(request, "admin.html")
 
 def StudentDashboard(request):
-    logging.info("Student Dashboard")
+    
     try:
         cur = connections['default'].cursor()
     except DatabaseError as e:
@@ -266,8 +259,7 @@ def StudentDashboard(request):
         messages.warning(request, "Internal error in fetching subjects")
         return redirect('Login')
     data = {items[0]: items[1] for items in cur}
-    logging.debug("Parameters")
-    logging.debug('Subjects'+str(data))
+    
 
     try:
         cur1 = connections['default'].cursor()
@@ -293,12 +285,12 @@ def StudentDashboard(request):
     dict['sent_time'] = message[4]
     dict['title'] = message[5]
     dict['content'] = message[6]
-    logging.debug('Notification: '+ str(dict))
+    
     return render(request, "StudentDashboard.html",{'username':greeting(request), 'url':'/StudentDashboard', 'Purl':'/StudentDashboard/StudentProfile'}|{'subject':data,'message':dict})
 
 
 def TeacherDashboard(request): 
-    logging.info('Teacher Dashboard')
+    
     cur=connections['default'].cursor()
     try:
         sql = """SELECT C.Branch, C.Sem, C.Sec, S.Subject_code, S.Subject_name 
@@ -313,7 +305,7 @@ def TeacherDashboard(request):
     for item in cur:
         name = item[0] + '-'+ str(item[1]) + item[2]
         data[name]=item[4]
-    logging.debug('Classes Handled'+str(data))
+    
 
     if(request.method == 'POST'):
         try:
@@ -324,7 +316,7 @@ def TeacherDashboard(request):
             sql = "INSERT INTO Notification(ssid,Class,Title,Message) VALUES (%s, %s, %s, %s);"
             cur.execute(sql, params)
             messages.success(request,"Message Sent")
-            logging.info('Message sent')
+           
             
         except (ObjectDoesNotExist,AttributeError,TypeError) as e:
             print(e)
@@ -335,7 +327,7 @@ def TeacherDashboard(request):
 
 
 def StudentProfile(request):
-    logging.info('Student Profile')
+    
     if(request.method!='POST'):
         cur = connections['default'].cursor()
         try:
@@ -345,7 +337,7 @@ def StudentProfile(request):
             print(e)
             messages.error(request, "Cannot fetch the profile data from database")
         data = cur.fetchone()
-        logging.debug('Profile data :'+str(data))
+        
         if data is None:
             cur = connections['default'].cursor()
             try:
@@ -401,11 +393,11 @@ def StudentProfile(request):
         print(e)
         messages.error(request,e.args)
     messages.success(request, "Saved Succesfully")
-    logging.info('Student Profile saved')
+    
     return redirect('StudentDashboard')
 
 def TeacherProfile(request):
-    logging.info('Teacher Profile')
+    
     if(request.method!='POST'):
         cur = connections['default'].cursor()
         try:
@@ -415,7 +407,7 @@ def TeacherProfile(request):
             print(e)
             messages.error(request, e.args)
         data = cur.fetchone()
-        logging.debug('Profile data:'+str(data))
+        
         if data is None:
             cur = connections['default'].cursor()
             try:
@@ -466,12 +458,10 @@ def TeacherProfile(request):
         print(e)
         messages.error(request, e.args)
     messages.success(request, "Saved sucessfully")
-    logging.info('Teacher Profile saved')
     return redirect('TeacherDashboard')
 
 
 def StudentFilePage(request, SubjectCode):
-    logging.info('Student File page')
     if request.method != "POST":
         if len(SubjectCode) > 7:
             raise Http404
@@ -495,7 +485,7 @@ def StudentFilePage(request, SubjectCode):
             print(e)
             messages.error(request, e.args)
         filedata = {items[0]: {'time':items[1], 'repo':items[2], 'by':items[3], 'marks':items[4]} for items in cur}
-        logging.debug('File data: '+str(filedata))
+       
         return render(request, 'StudentFilePage.html', {'username':greeting(request), 'SubjectName':SubjectCode, 'data':data, 'filedata':filedata, 'url':'/StudentDashboard', 'Purl':'/StudentDashboard/StudentProfile'})
     
     try:
@@ -512,7 +502,7 @@ def StudentFilePage(request, SubjectCode):
     FileLocation = request.session.get('user')+'/'+FileName
     path = default_storage.save(FileLocation, ContentFile(File.read())) # Downloading the file
     #print(path)
-    logging.debug('Upload file path: '+str(path))
+    
     # print(File.content_type)
     # uploadFile = str(File.read())
     # # with open(uploadFile,"wb") as f:
@@ -537,7 +527,7 @@ def StudentFilePage(request, SubjectCode):
     return redirect('StudentFilePage', SubjectCode)
 
 def TeacherFilePage(request, ClassName):
-    logging.info("Teacher File Page")
+    
     if request.method != "POST":
         if len(ClassName) > 6:
             raise Http404
@@ -593,7 +583,6 @@ def TeacherFilePage(request, ClassName):
     return redirect('TeacherFilePage', ClassName)
 
 def notifications(request):
-    logging.info('Notifications')
     cur = connections['default'].cursor()
     try:
         sql = """SELECT DISTINCT M.* FROM Message_recieved M
@@ -627,7 +616,7 @@ def downloadFile(request):
         msg = request.POST.get('downloadValue')
         marks = request.POST.get("marks")
         #print(btn, msg, marks)
-        logging.debug('File download data: '+ str(btn)+ str(msg)+ str(marks))
+        
 
         if btn is None:
             cur = connections['default'].cursor()
@@ -685,7 +674,6 @@ def deleteFile(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 def UserAdminLogin(request):
-    logging.info('UserAdmin login')
     if request.method != "POST":
         return render(request, "adminLogin.html")
 
@@ -763,7 +751,6 @@ def archive(request):
         return response
 
     filedata = [file for file in os.listdir(settings.MEDIA_ROOT+request.session['user'])]
-    logging.info(filedata)
     return render(request, "downloadAll.html", {'username':greeting(request), 'filedata':filedata, 'url':'/StudentDashboard', 'Purl':'/StudentDashboard/StudentProfile'})
         
     
